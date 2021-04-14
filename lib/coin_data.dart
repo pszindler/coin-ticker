@@ -36,17 +36,21 @@ const List<String> cryptoList = [
 ];
 
 class CoinData {
-  Future getCoinData(String cryptoValue, String Currency) async {
-    var url =
-        Uri.https('rest.coinapi.io', '/v1/exchangerate/$cryptoValue/$Currency');
-    var response = await http.get(url, headers: {'X-CoinAPI-Key': apiKey});
-    if (response.statusCode == 200) {
-      var decodedData = convert.jsonDecode(response.body);
-      var lastPrice = decodedData['rate'];
-      return lastPrice;
-    } else {
-      print(response.statusCode);
-      throw 'Problem with request';
+  Future getCoinData(String Currency) async {
+    Map<String, String> cryptoPrices = {};
+    for (String crypto in cryptoList) {
+      var url =
+          Uri.https('rest.coinapi.io', '/v1/exchangerate/$crypto/$Currency');
+      var response = await http.get(url, headers: {'X-CoinAPI-Key': apiKey});
+      if (response.statusCode == 200) {
+        var decodedData = convert.jsonDecode(response.body);
+        double lastPrice = decodedData['rate'];
+        cryptoPrices[crypto] = lastPrice.toStringAsFixed(0);
+      } else {
+        print(response.statusCode);
+        throw 'Problem with request';
+      }
     }
+    return cryptoPrices;
   }
 }
